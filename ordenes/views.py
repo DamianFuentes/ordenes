@@ -2,6 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
+from PIL import Image
 from .models import Orden
 from .serializers import OrdenSerializer
 
@@ -27,15 +28,29 @@ def ordenes_list(request):
 
 @csrf_exempt
 @api_view(['GET'])
-def ordenes_detail(request, pk):
+def orden_detail(request, pk):
     """
     Ver una Orden.
     """
     try:
-        ordenes = Orden.objects.get(pk=pk)
+        orden = Orden.objects.get(pk=pk)
     except Orden.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = OrdenSerializer(ordenes)
-        return JsonResponse(serializer.data)
+        serializer = OrdenSerializer(orden)
+        return JsonResponse(serializer.data,)
+
+
+@api_view(['GET'])
+def orden_foto(request, pk):
+    """
+    Ver una Orden.
+    """
+    try:
+        orden = Orden.objects.get(pk=pk)
+    except Orden.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        return HttpResponse(orden.orden.read(), content_type="image/jpeg")
