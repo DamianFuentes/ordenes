@@ -19,6 +19,7 @@ def ordenes_list(request):
         serializer = OrdenSerializer(ordenes, many=True)
         return JsonResponse(serializer.data, safe=False)
     elif request.method == 'POST':
+        print(request.data)
         serializer = OrdenSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
