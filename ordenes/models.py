@@ -19,9 +19,22 @@ class PathAndRename(object):
 
 path_and_rename = PathAndRename('imgs_ordenes/')
 
-class Orden(models.Model):
+class OrdenPapel(models.Model):
     laboratorio = models.CharField(max_length=20)
     entrada = models.CharField(max_length=25)
     fecha = models.DateField()
     orden = models.ImageField(upload_to=path_and_rename)
+
+class OrdenSistema(models.Model):
+    laboratorio = models.CharField(max_length=20)
+    entrada = models.CharField(max_length=25)
+    fechaRegistro = models.DateField()
+    fechaSubido = models.DateField(blank=False, null=True)
+    fechaPrescripcion = models.DateField()
+    diagnostico = models.CharField(max_length=150, blank=False, null=True)
+    prescriptor = models.CharField(max_length=100)
+    paciente = models.CharField(max_length=100)
+    items = models.CharField(max_length=200)
+    descargado = models.BooleanField(blank=False, default=False)
+    editado = models.BooleanField(blank=False, default=False)
 

@@ -1,8 +1,14 @@
-from .models import Orden
+from .models import OrdenPapel
+from .models import OrdenSistema
 from rest_framework import serializers
 
 
-class OrdenSerializer(serializers.ModelSerializer):
+class OrdenPapelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Orden
+        model = OrdenPapel
+        fields = '__all__'
+
+class OrdenSistemaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrdenSistema
         fields = '__all__'

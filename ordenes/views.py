@@ -3,24 +3,26 @@ from rest_framework.decorators import api_view
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from PIL import Image
-from .models import Orden
-from .serializers import OrdenSerializer
+from .models import OrdenPapel
+from .models import OrdenSistema
+from .serializers import OrdenPapelSerializer
+from .serializers import OrdenSistemaSerializer
 
 
 @csrf_exempt
 @api_view(['GET','POST'])
-def ordenes_list(request):
+def ordenes_papel_list(request):
     """
     Lista de Ordenes y crear nueva orden
     """
     if request.method == 'GET':
-        ordenes = Orden.objects.all()
+        ordenes = OrdenPapel.objects.all()
         print(ordenes)
-        serializer = OrdenSerializer(ordenes, many=True)
+        serializer = OrdenPapelSerializer(ordenes, many=True)
         return JsonResponse(serializer.data, safe=False)
     elif request.method == 'POST':
         print(request.data)
-        serializer = OrdenSerializer(data=request.data)
+        serializer = OrdenPapelSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -29,29 +31,83 @@ def ordenes_list(request):
 
 @csrf_exempt
 @api_view(['GET'])
-def orden_detail(request, pk):
+def orden_papel_detail(request, entry):
     """
-    Ver una Orden.
+    Ver una Orden papel
     """
     try:
-        orden = Orden.objects.get(pk=pk)
-    except Orden.DoesNotExist:
+        orden = OrdenPapel.objects.filter(entrada=entry).last()
+    except OrdenPapel.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = OrdenSerializer(orden)
+        serializer = OrdenPapelSerializer(orden)
         return JsonResponse(serializer.data,)
 
 
 @api_view(['GET'])
-def orden_foto(request, pk):
+def orden_papel_foto(request, entry):
     """
-    Ver una Orden.
+    Ver foto orden papel
     """
     try:
-        orden = Orden.objects.get(pk=pk)
-    except Orden.DoesNotExist:
+        orden = OrdenPapel.objects.filter(entrada=entry).last()
+    except OrdenPapel.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
         return HttpResponse(orden.orden.read(), content_type="image/jpeg")
+
+@csrf_exempt
+@api_view(['GET','POST'])
+def ordenes_sistema_list(request):
+    """
+    Lista de Ordenes y crear nueva orden Orbital
+    """
+    if request.method == 'GET':
+        ordenes = OrdenSistema.objects.all()
+        print(ordenes)
+        serializer = OrdenSistemaSerializer(ordenes, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    elif request.method == 'POST':
+        print(request.data)
+        serializer = OrdenSistemaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+@api_view(['GET'])
+def orden_sistema_detail(request, entry):
+    """
+    Ver una Orden Orbital
+    """
+    try:
+        orden = OrdenSistema.objects.filter(entrada=entry).last()
+    except OrdenSistema.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = OrdenSistemaSerializer(orden)
+        return JsonResponse(serializer.data,)
+
+
+@api_view(['GET'])
+def orden_completa(request, entry):
+    """
+    Ver una Orden Completa
+    """
+    try:
+        ordenPapel = OrdenPapel.objects.filter(entrada=entry).last()
+    except OrdenPapel.DoesNotExist:
+        return HttpResponse(status=404)
+    try:
+        ordenSistema = OrdenSistema.objects.filter(entrada=entry).last()
+    except OrdenSistema.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = OrdenSistemaSerializer(orden)
+        return JsonResponse(serializer.data,)
