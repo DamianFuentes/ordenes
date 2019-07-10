@@ -1,13 +1,15 @@
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from PIL import Image
 from .models import OrdenPapel
 from .models import OrdenSistema
+from django.contrib.auth.models import User
 from .serializers import OrdenPapelSerializer
 from .serializers import OrdenSistemaSerializer
-
 
 @csrf_exempt
 @api_view(['GET','POST'])
@@ -43,20 +45,24 @@ def orden_papel_detail(request, entry):
     if request.method == 'GET':
         serializer = OrdenPapelSerializer(orden)
         return JsonResponse(serializer.data,)
+        
 
-
+@csrf_exempt
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 def orden_papel_foto(request, entry):
     """
     Ver foto orden papel
     """
-    try:
-        orden = OrdenPapel.objects.filter(entrada=entry).last()
-    except OrdenPapel.DoesNotExist:
-        return HttpResponse(status=404)
 
     if request.method == 'GET':
-        return HttpResponse(orden.orden.read(), content_type="image/jpeg")
+        try:
+            orden = OrdenPapel.objects.filter(entrada=entry).last()
+            return HttpResponse(orden.orden.read(), content_type="image/jpeg")
+        except Exception as e :
+            image_data = open("imgs_ordenes/not_found.jpg", "rb").read()
+            return HttpResponse(image_data, content_type="image/jpeg")
+
 
 @csrf_exempt
 @api_view(['GET','POST'])
@@ -93,21 +99,11 @@ def orden_sistema_detail(request, entry):
         serializer = OrdenSistemaSerializer(orden)
         return JsonResponse(serializer.data,)
 
-
+@csrf_exempt
 @api_view(['GET'])
-def orden_completa(request, entry):
+def chequeo_credenciales(request):
     """
-    Ver una Orden Completa
+    Chequeo que sea usuario valido
     """
-    try:
-        ordenPapel = OrdenPapel.objects.filter(entrada=entry).last()
-    except OrdenPapel.DoesNotExist:
-        return HttpResponse(status=404)
-    try:
-        ordenSistema = OrdenSistema.objects.filter(entrada=entry).last()
-    except OrdenSistema.DoesNotExist:
-        return HttpResponse(status=404)
-
     if request.method == 'GET':
-        serializer = OrdenSistemaSerializer(orden)
-        return JsonResponse(serializer.data,)
+        return HttpResponse('Todo OK')
